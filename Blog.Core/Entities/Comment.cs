@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Blog.Core.Entities
+﻿namespace Blog.Core.Entities
 {
-    internal class Comment
+    public class Comment
     {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public string AuthorName { get; set; } = string.Empty;
+        public string Text { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Yorumun ait olduğu post
+        public Guid PostId { get; set; }
+        public Post? Post { get; set; }
     }
 }
