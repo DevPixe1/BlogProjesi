@@ -24,9 +24,11 @@ namespace Blog.Data.Migrations
 
             modelBuilder.Entity("Blog.Core.Entities.Category", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -36,6 +38,23 @@ namespace Blog.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Tarih"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Bilim"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Felsefe"
+                        });
                 });
 
             modelBuilder.Entity("Blog.Core.Entities.Comment", b =>
@@ -72,8 +91,8 @@ namespace Blog.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Content")
                         .IsRequired()

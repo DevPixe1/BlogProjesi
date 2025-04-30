@@ -8,7 +8,7 @@ namespace Blog.Data
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options) { }
 
-        public DbSet<Post> Posts => Set<Post>();
+        public DbSet<Post> Posts { get; set; }
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Comment> Comments => Set<Comment>();
 
@@ -39,6 +39,14 @@ namespace Blog.Data
                       .WithMany(p => p.Comments)
                       .HasForeignKey(c => c.PostId);
             });
+
+            // Kategori başlangıç verisi
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = 1, Name = "Tarih" },
+                new Category { Id = 2, Name = "Bilim" },
+                new Category { Id = 3, Name = "Felsefe" }
+            );
         }
+
     }
 }
