@@ -1,21 +1,23 @@
-﻿using Blog.Core.Repositories;
-using Blog.Core.UnitOfWork;
-using Blog.Data.Repositories;
+﻿using Blog.Core.UnitOfWork;
+using Blog.Core.Entities;
 
 namespace Blog.Data.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _context;
-        private readonly IPostRepository _postRepository;
+
+        public IGenericRepository<Post> Posts { get; }
+        public IGenericRepository<Comment> Comments { get; }
+        public IGenericRepository<Category> Categories { get; }
 
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
-            _postRepository = new PostRepository(context);
+            Posts = new GenericRepository<Post>(_context);
+            Comments = new GenericRepository<Comment>(_context);
+            Categories = new GenericRepository<Category>(_context);
         }
-
-        public IPostRepository Posts => _postRepository;
 
         public async Task<int> SaveChangesAsync()
         {

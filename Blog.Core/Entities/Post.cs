@@ -2,12 +2,15 @@
 {
     public class Post
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public string Title { get; set; } = string.Empty;
-        public string Content { get; set; } = string.Empty;
-        public int CategoryId { get; set; }
-        public Category? Category { get; set; }
-        public List<Comment> Comments { get; set; } = new();
+        public Guid Id { get; set; }
+        public string Title { get; set; } = null!;
+        public string Content { get; set; } = null!;
+        public string Author { get; set; } = null!;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public int CategoryId { get; set; }
+        public Category Category { get; set; } = null!;
+
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

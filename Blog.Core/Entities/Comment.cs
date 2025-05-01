@@ -2,13 +2,12 @@
 {
     public class Comment
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public string AuthorName { get; set; } = string.Empty;
-        public string Text { get; set; } = string.Empty;
+        public Guid Id { get; set; }
+        public string Text { get; set; } = null!;
+        public string AuthorName { get; set; } = null!;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Yorumun ait olduğu post
         public Guid PostId { get; set; }
-        public Post? Post { get; set; }
+        public Post Post { get; set; } = null!;
     }
 }

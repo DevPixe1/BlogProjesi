@@ -1,7 +1,5 @@
-using Blog.Core.Repositories;
 using Blog.Core.UnitOfWork;
 using Blog.Data;
-using Blog.Data.Repositories;
 using Blog.Data.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,8 +13,6 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IPostRepository, PostRepository>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var app = builder.Build();
 
