@@ -1,5 +1,8 @@
-﻿using Blog.Core.UnitOfWork;
+﻿using System.Threading.Tasks;
 using Blog.Core.Entities;
+using Blog.Core.Repositories;
+using Blog.Core.UnitOfWork;
+using Blog.Data.Repositories;
 
 namespace Blog.Data.UnitOfWork
 {

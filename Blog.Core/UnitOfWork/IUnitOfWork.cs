@@ -1,4 +1,5 @@
 ﻿using Blog.Core.Entities;
+using Blog.Core.Repositories;
 
 namespace Blog.Core.UnitOfWork
 {
