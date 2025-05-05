@@ -1,13 +1,15 @@
-﻿namespace Blog.Core.Entities
+﻿using System;
+
+namespace Blog.Core.Entities
 {
     public class Comment
     {
-        public Guid Id { get; set; }
-        public string Text { get; set; } = null!;
-        public string AuthorName { get; set; } = null!;
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public int Id { get; set; } // int ID
+        public string Content { get; set; } // Yorum içeriği
+        public DateTime CreatedAt { get; set; } // Gönderilme tarihi
 
+        // İlişki: Her yorum bir posta ait
         public Guid PostId { get; set; }
-        public Post Post { get; set; } = null!;
+        public Post Post { get; set; }
     }
 }
