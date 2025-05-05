@@ -2,10 +2,11 @@
 using Blog.Core.Entities;
 using Blog.Core.Services;
 using Blog.Core.UnitOfWork;
-using Blog.Data.UnitOfWork;
 
 namespace Blog.Service.Services
 {
+    // Post ile ilgili iş mantıklarının bulunduğu servis sınıfı.
+    // DTO kullanarak dış dünyaya sade veri sunar.
     public class PostService : IPostService
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -15,6 +16,7 @@ namespace Blog.Service.Services
             _unitOfWork = unitOfWork;
         }
 
+        // ID ile post getirir, DTO'ya dönüştürür
         public async Task<PostDto?> GetByIdAsync(Guid id)
         {
             var post = await _unitOfWork.Posts.GetByIdAsync(id);
@@ -31,6 +33,7 @@ namespace Blog.Service.Services
             };
         }
 
+        // Tüm postları DTO listesi olarak döner
         public async Task<IEnumerable<PostDto>> GetAllAsync()
         {
             var posts = await _unitOfWork.Posts.GetAllAsync();
@@ -45,6 +48,7 @@ namespace Blog.Service.Services
             });
         }
 
+        // Yeni bir post oluşturur ve ID’sini döner
         public async Task<Guid> CreateAsync(CreatePostDto dto)
         {
             var post = new Post
@@ -62,6 +66,7 @@ namespace Blog.Service.Services
             return post.Id;
         }
 
+        // Postu günceller, işlem başarılıysa true döner
         public async Task<bool> UpdateAsync(Guid id, UpdatePostDto dto)
         {
             var post = await _unitOfWork.Posts.GetByIdAsync(id);
@@ -77,6 +82,7 @@ namespace Blog.Service.Services
             return true;
         }
 
+        // Postu siler, işlem başarılıysa true döner
         public async Task<bool> DeleteAsync(Guid id)
         {
             var post = await _unitOfWork.Posts.GetByIdAsync(id);
