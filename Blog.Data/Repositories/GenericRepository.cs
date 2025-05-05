@@ -13,38 +13,43 @@ namespace Blog.Data.Repositories
         public GenericRepository(AppDbContext context)
         {
             _context = context;
-            _dbSet = _context.Set<T>(); // ✅ DbSet burada başlatılıyor
+            _dbSet = _context.Set<T>(); // DbSet burada başlatılıyor
         }
 
+        // Tüm kayıtları getirir
         public async Task<List<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();
         }
 
+        // ID'ye göre tek bir kaydı getirir
         public async Task<T?> GetByIdAsync(Guid id)
         {
             return await _dbSet.FindAsync(id);
         }
 
+        // Yeni bir kayıt ekler
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
         }
 
+        // Var olan bir kaydı günceller
         public void Update(T entity)
         {
             _dbSet.Update(entity);
         }
 
+        // Var olan bir kaydı siler
         public void Delete(T entity)
         {
             _dbSet.Remove(entity);
         }
 
+        // Belirli bir filtreye göre kayıtları getirir
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbSet.Where(predicate).ToListAsync();
         }
     }
-
 }
