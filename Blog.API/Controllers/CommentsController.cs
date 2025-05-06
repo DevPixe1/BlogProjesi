@@ -22,11 +22,25 @@ namespace Blog.API.Controllers
             await _commentService.AddCommentAsync(dto); // Yorumu veritabanına kaydeder
             return Ok("Yorum başarıyla eklendi.");
         }
-
-        [HttpGet("post/{postId}")] // Belirli bir post'a ait yorumları getirir
-        public async Task<IActionResult> GetComments(Guid postId)
+        [HttpPut("{guid}")]
+        public async Task<IActionResult> UpdateComment(Guid guid, [FromBody] string content)
         {
-            var comments = await _commentService.GetCommentsByPostIdAsync(postId);
+            await _commentService.UpdateCommentAsync(guid, content);
+            return Ok("Yorum güncellendi.");
+        }
+
+        [HttpDelete("{guid}")]
+        public async Task<IActionResult> DeleteComment(Guid guid)
+        {
+            await _commentService.DeleteCommentAsync(guid);
+            return Ok("Yorum silindi.");
+        }
+
+
+        [HttpGet("post/{PostGuid}")] // Belirli bir post'a ait yorumları getirir
+        public async Task<IActionResult> GetComments(Guid PostGuid)
+        {
+            var comments = await _commentService.GetCommentsByPostIdAsync(PostGuid);
             return Ok(comments);
         }
     }

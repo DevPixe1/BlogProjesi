@@ -24,11 +24,11 @@ namespace Blog.API.Controllers
             return Ok(posts);
         }
 
-        // Belirli bir gönderiyi ID'sine göre getirir
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        // Belirli bir gönderiyi GUID'e göre getirir
+        [HttpGet("{guid}")]
+        public async Task<IActionResult> GetById(Guid guid)
         {
-            var post = await _postService.GetByIdAsync(id);
+            var post = await _postService.GetByIdAsync(guid);
             if (post == null) return NotFound(); // Gönderi bulunamazsa 404 döner
             return Ok(post);
         }
@@ -38,24 +38,25 @@ namespace Blog.API.Controllers
         public async Task<IActionResult> Create([FromBody] CreatePostDto dto)
         {
             var postId = await _postService.CreateAsync(dto);
-            // Başarıyla oluşturulduğunda 201 Created döner, yeni gönderinin URL'ini içerir
-            return CreatedAtAction(nameof(GetById), new { id = postId }, null);
+
+            // Route parametresini "guid" olarak eşleştiriyoruz
+            return CreatedAtAction(nameof(GetById), new { guid = postId }, null);
         }
 
         // Var olan bir gönderiyi günceller
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UpdatePostDto dto)
+        [HttpPut("{guid}")]
+        public async Task<IActionResult> Update(Guid guid, [FromBody] UpdatePostDto dto)
         {
-            var result = await _postService.UpdateAsync(id, dto);
+            var result = await _postService.UpdateAsync(guid, dto);
             if (!result) return NotFound(); // Güncellenecek gönderi bulunamazsa 404 döner
             return NoContent(); // Başarılı güncellemede içerik dönülmez
         }
 
         // Belirli bir gönderiyi siler
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpDelete("{guid}")]
+        public async Task<IActionResult> Delete(Guid guid)
         {
-            var result = await _postService.DeleteAsync(id);
+            var result = await _postService.DeleteAsync(guid);
             if (!result) return NotFound(); // Silinecek gönderi yoksa 404 döner
             return NoContent(); // Başarılı silme işleminde içerik dönülmez
         }

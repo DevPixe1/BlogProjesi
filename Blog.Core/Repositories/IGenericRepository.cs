@@ -12,6 +12,6 @@ namespace Blog.Core.Repositories
         void Delete(T entity);               // Veriyi siler
 
         Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate);
-
+        Task SaveChangesAsync();
     }
 }

@@ -12,9 +12,12 @@ namespace Blog.Core.Services
     {
         // Yeni bir yorum ekler.
         Task AddCommentAsync(CommentDto dto);
-
+        Task UpdateCommentAsync(Guid commentId, string newContent);
+        Task DeleteCommentAsync(Guid commentId);
         // Belirli bir gönderiye (post) ait tüm yorumları getirir.
-        Task<IEnumerable<Comment>> GetCommentsByPostIdAsync(Guid postId);
+        // ICommentService.cs
+        Task<IEnumerable<CommentDto>> GetCommentsByPostIdAsync(Guid postId);
+
     }
 
 }

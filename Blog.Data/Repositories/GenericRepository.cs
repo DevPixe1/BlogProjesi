@@ -32,6 +32,7 @@ namespace Blog.Data.Repositories
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync();
         }
 
         // Var olan bir kaydı günceller
@@ -46,10 +47,17 @@ namespace Blog.Data.Repositories
             _dbSet.Remove(entity);
         }
 
+        public async Task SaveChangesAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+
         // Belirli bir filtreye göre kayıtları getirir
         public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbSet.Where(predicate).ToListAsync();
         }
+
     }
 }
