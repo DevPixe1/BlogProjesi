@@ -1,4 +1,5 @@
-﻿using Blog.Core.DTOs;
+﻿using AutoMapper;
+using Blog.Core.DTOs;
 using Blog.Core.Entities;
 using Blog.Core.Services;
 using Blog.Core.UnitOfWork;
@@ -10,10 +11,12 @@ namespace Blog.Service.Services
     public class PostService : IPostService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public PostService(IUnitOfWork unitOfWork)
+        public PostService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         // ID ile post getirir, DTO'ya dönüştürür
@@ -22,44 +25,22 @@ namespace Blog.Service.Services
             var post = await _unitOfWork.Posts.GetByIdAsync(id);
             if (post == null) return null;
 
-            return new PostDto
-            {
-                Id = post.Id,
-                Title = post.Title,
-                Content = post.Content,
-                Author = post.Author,
-                CategoryId = post.CategoryId,
-                CreatedAt = post.CreatedAt
-            };
+            return _mapper.Map<PostDto>(post);
         }
 
         // Tüm postları DTO listesi olarak döner
         public async Task<IEnumerable<PostDto>> GetAllAsync()
         {
             var posts = await _unitOfWork.Posts.GetAllAsync();
-            return posts.Select(p => new PostDto
-            {
-                Id = p.Id,
-                Title = p.Title,
-                Content = p.Content,
-                Author = p.Author,
-                CategoryId = p.CategoryId,
-                CreatedAt = p.CreatedAt
-            });
+            return _mapper.Map<IEnumerable<PostDto>>(posts);
         }
 
         // Yeni bir post oluşturur ve ID’sini döner
         public async Task<Guid> CreateAsync(CreatePostDto dto)
         {
-            var post = new Post
-            {
-                Id = Guid.NewGuid(),
-                Title = dto.Title,
-                Content = dto.Content,
-                Author = dto.Author,
-                CategoryId = dto.CategoryId,
-                CreatedAt = DateTime.UtcNow
-            };
+            var post = _mapper.Map<Post>(dto);
+            post.Id = Guid.NewGuid();
+            post.CreatedAt = DateTime.UtcNow;
 
             await _unitOfWork.Posts.AddAsync(post);
             await _unitOfWork.SaveChangesAsync();
@@ -72,11 +53,7 @@ namespace Blog.Service.Services
             var post = await _unitOfWork.Posts.GetByIdAsync(id);
             if (post == null) return false;
 
-            post.Title = dto.Title;
-            post.Content = dto.Content;
-            post.Author = dto.Author;
-            post.CategoryId = dto.CategoryId;
-
+            _mapper.Map(dto, post); // DTO'dan mevcut post nesnesine değerleri aktar
             _unitOfWork.Posts.Update(post);
             await _unitOfWork.SaveChangesAsync();
             return true;

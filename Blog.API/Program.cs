@@ -1,30 +1,31 @@
-using Blog.Core.Repositories;
-using Blog.Core.Services;
-using Blog.Core.UnitOfWork;
-using Blog.Data;
-using Blog.Data.Repositories;
-using Blog.Data.UnitOfWork;
-using Blog.Service.Services;
-using Microsoft.EntityFrameworkCore;
+using Blog.API.Extensions;
+using Blog.Service.Mapping;
+using Blog.Service.Validators;
+using FluentValidation.AspNetCore;
+using FluentValidation;
+using Blog.Service.Validations;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// DbContext
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Proje servislerini merkezi olarak ekler (DbContext, AutoMapper, FluentValidation, Repos, Services, UnitOfWork vs.)
+builder.Services.AddProjectServices(builder.Configuration);
 
-// Dependency Injection
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<IPostService, PostService>();
-builder.Services.AddScoped<ICommentService, CommentService>(); // Comment servisini burada ekliyoruz
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+// FluentValidation konfigürasyonu
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePostDtoValidator>(); // BURASI ÖNEMLÝ
 
+// AutoMapper konfigürasyonu
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
+// Controller ve Swagger servisleri
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Geliþtirme ortamýnda Swagger'ý aktif eder
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -34,4 +35,5 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();
