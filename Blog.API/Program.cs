@@ -4,11 +4,45 @@ using Blog.Service.Validators;
 using FluentValidation.AspNetCore;
 using FluentValidation;
 using Blog.Service.Validations;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Blog.Core.Configurations;
+using Blog.Core.Interfaces;
+using Blog.Service.Services; // JwtService
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Proje servislerini merkezi olarak ekler (DbContext, AutoMapper, FluentValidation, Repos, Services, UnitOfWork vs.)
 builder.Services.AddProjectServices(builder.Configuration);
+
+// JWT ayarlarýný appsettings.json'dan okur ve DI container'a ekler
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+
+// JwtService'i IOC container'a ekler
+builder.Services.AddScoped<IJwtService, JwtService>();
+
+// JWT authentication middleware'i ekler
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SecretKey)),
+        ClockSkew = TimeSpan.Zero // Token süresi dolunca hemen geçersiz olsun
+    };
+});
 
 // FluentValidation konfigürasyonu
 builder.Services.AddFluentValidationAutoValidation();
@@ -33,7 +67,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// JWT doðrulama iþlemini aktive eder
+app.UseAuthentication();
+
+// Yetki kontrolü (örneðin [Authorize]) burada devreye girer
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

@@ -1,9 +1,11 @@
 ﻿using Blog.Core.DTOs;
 using Blog.Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Blog.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PostController : ControllerBase
