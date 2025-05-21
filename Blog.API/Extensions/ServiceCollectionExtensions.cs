@@ -12,6 +12,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 
 namespace Blog.API.Extensions
 {
@@ -40,6 +41,43 @@ namespace Blog.API.Extensions
             // Servislerin DI kaydı
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<ICommentService, CommentService>();
+
+            // Swagger konfigürasyonu (JWT desteği ile birlikte)
+            services.AddSwaggerGen(c =>
+            {
+                // Swagger dokümanı başlığı ve versiyonu
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Blog API",
+                    Version = "v1",
+                    Description = "JWT ile korunan Blog API dokümantasyonu"
+                });
+
+                // JWT kimlik doğrulama şeması tanımı
+                var securitySchema = new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Description = "Bearer {token} formatında JWT giriniz.",
+                    In = ParameterLocation.Header,
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "bearer",
+                    BearerFormat = "JWT",
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    }
+                };
+
+                // Swagger'a şemayı tanıt
+                c.AddSecurityDefinition("Bearer", securitySchema);
+
+                // Tüm endpoint'lerde güvenlik gereksinimi olarak JWT kullan
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    { securitySchema, new[] { "Bearer" } }
+                });
+            });
 
             return services;
         }

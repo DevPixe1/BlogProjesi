@@ -10,6 +10,7 @@ using System.Text;
 using Blog.Core.Configurations;
 using Blog.Core.Interfaces;
 using Blog.Service.Services; // JwtService
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,7 +56,31 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 // Controller ve Swagger servisleri
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+
+    // JWT ile kimlik doðrulama için Swagger yapýlandýrmasý
+    var securitySchema = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "JWT token'ýnýzý 'Bearer {token}' formatýnda girin.",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        { securitySchema, new[] { "Bearer" } }
+    });
+});
+
 
 var app = builder.Build();
 
