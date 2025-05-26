@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Blog.Core.Enums;
 
 namespace Blog.Core.Interfaces
 {
     public interface IJwtService
     {
-        string GenerateToken(string username);
+        // Uusername + rol
+        string GenerateToken(string username, UserRole role);
     }
-
 }
