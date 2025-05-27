@@ -23,6 +23,9 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 // JwtService'i IOC container'a ekler
 builder.Services.AddScoped<IJwtService, JwtService>();
 
+// Yetkilendirme servisini ekler (rollerin çalýþmasý için gereklidir)
+builder.Services.AddAuthorization();
+
 // JWT authentication middleware'i ekler
 builder.Services.AddAuthentication(options =>
 {
@@ -58,7 +61,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-
     // JWT ile kimlik doðrulama için Swagger yapýlandýrmasý
     var securitySchema = new OpenApiSecurityScheme
     {
@@ -81,7 +83,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
 var app = builder.Build();
 
 // Geliþtirme ortamýnda Swagger'ý aktif eder
@@ -93,11 +94,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// JWT doðrulama iþlemini aktive eder
-app.UseAuthentication();
-
-// Yetki kontrolü (örneðin [Authorize]) burada devreye girer
-app.UseAuthorization();
+app.UseAuthentication(); // JWT doðrulama iþlemini aktive eder
+app.UseAuthorization();  // Yetki kontrolü (örneðin [Authorize]) burada devreye girer
 
 app.MapControllers();
 

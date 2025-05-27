@@ -12,40 +12,36 @@ using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Blog.Service.Validations;
 using Microsoft.OpenApi.Models;
+using Blog.Core.Interfaces; // IJwtService
 
 namespace Blog.API.Extensions
 {
-    // Uygulamadaki servisleri merkezi olarak kaydeder
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddProjectServices(this IServiceCollection services, IConfiguration configuration)
         {
-            // Veritabanı bağlantısı ve DbContext konfigürasyonu
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            // AutoMapper konfigürasyonu
             services.AddAutoMapper(typeof(AutoMapperProfile));
 
-            // FluentValidation ayarları
             services.AddFluentValidationAutoValidation();
             services.AddFluentValidationClientsideAdapters();
+            services.AddValidatorsFromAssemblyContaining<CreatePostDtoValidator>();
 
-            // Generic repository kaydı
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
-            // UnitOfWork kaydı
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            // Servislerin DI kaydı
             services.AddScoped<IPostService, PostService>();
             services.AddScoped<ICommentService, CommentService>();
+            services.AddScoped<IJwtService, JwtService>(); // <-- Buraya eklendi
 
-            // Swagger konfigürasyonu (JWT desteği ile birlikte)
+            services.AddAuthorization(); // <-- Buraya da eklendi
+
             services.AddSwaggerGen(c =>
             {
-                // Swagger dokümanı başlığı ve versiyonu
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "Blog API",
@@ -53,7 +49,6 @@ namespace Blog.API.Extensions
                     Description = "JWT ile korunan Blog API dokümantasyonu"
                 });
 
-                // JWT kimlik doğrulama şeması tanımı
                 var securitySchema = new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
@@ -69,10 +64,8 @@ namespace Blog.API.Extensions
                     }
                 };
 
-                // Swagger'a şemayı tanıt
                 c.AddSecurityDefinition("Bearer", securitySchema);
 
-                // Tüm endpoint'lerde güvenlik gereksinimi olarak JWT kullan
                 c.AddSecurityRequirement(new OpenApiSecurityRequirement
                 {
                     { securitySchema, new[] { "Bearer" } }

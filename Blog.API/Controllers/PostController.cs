@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Blog.API.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class PostController : ControllerBase
@@ -20,6 +19,7 @@ namespace Blog.API.Controllers
 
         // Tüm blog gönderilerini getirir
         [HttpGet("Hepsini getir")]
+        [AllowAnonymous] // Herkes erişebilir (Outsider dahil)
         public async Task<IActionResult> GetAll()
         {
             var posts = await _postService.GetAllAsync();
@@ -28,6 +28,7 @@ namespace Blog.API.Controllers
 
         // Belirli bir gönderiyi GUID'e göre getirir
         [HttpGet("{guid}")]
+        [AllowAnonymous] // Herkes erişebilir (Outsider dahil)
         public async Task<IActionResult> GetById(Guid guid)
         {
             var post = await _postService.GetByIdAsync(guid);
@@ -37,6 +38,7 @@ namespace Blog.API.Controllers
 
         // Yeni bir gönderi oluşturur
         [HttpPost]
+        [Authorize(Roles = "Author")] // Sadece Author oluşturabilir
         public async Task<IActionResult> Create([FromBody] CreatePostDto dto)
         {
             var postId = await _postService.CreateAsync(dto);
@@ -47,6 +49,7 @@ namespace Blog.API.Controllers
 
         // Var olan bir gönderiyi günceller
         [HttpPut("{guid}")]
+        [Authorize(Roles = "Author")] // Sadece Author güncelleyebilir
         public async Task<IActionResult> Update(Guid guid, [FromBody] UpdatePostDto dto)
         {
             var result = await _postService.UpdateAsync(guid, dto);
@@ -56,6 +59,7 @@ namespace Blog.API.Controllers
 
         // Belirli bir gönderiyi siler
         [HttpDelete("{guid}")]
+        [Authorize(Roles = "Author")] // Sadece Author silebilir
         public async Task<IActionResult> Delete(Guid guid)
         {
             var result = await _postService.DeleteAsync(guid);
