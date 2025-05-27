@@ -1,6 +1,6 @@
 ﻿namespace Blog.Core.Entities
 {
-    // Kategorileri temsil eden varlık (örneğin: Teknoloji, Sağlık, Spor)
+    // Kategorileri temsil eden varlık
     public class Category
     {
         public int Id { get; set; }                      // Kategorinin benzersiz kimliği

@@ -11,6 +11,8 @@ using Blog.Core.Configurations;
 using Blog.Core.Interfaces;
 using Blog.Service.Services; // JwtService
 using Microsoft.OpenApi.Models;
+using Blog.Core.Repositories;
+using Blog.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,8 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 
 // JwtService'i IOC container'a ekler
 builder.Services.AddScoped<IJwtService, JwtService>();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 // Yetkilendirme servisini ekler (rollerin çalýþmasý için gereklidir)
 builder.Services.AddAuthorization();

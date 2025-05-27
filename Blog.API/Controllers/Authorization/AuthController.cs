@@ -1,48 +1,41 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Blog.Core.Interfaces;
-using Blog.Core.DTOs.Authorization;
+﻿using Blog.Core.DTOs;
 using Blog.Core.Enums;
+using Blog.Core.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
-namespace Blog.API.Controllers.Authorization;
-
-[ApiController]
-[Route("api/[controller]")]
-public class AuthController : ControllerBase
+namespace Blog.API.Controllers
 {
-    private readonly IJwtService _jwtService;
-
-    // JwtService DI (dependency injection) ile alınır
-    public AuthController(IJwtService jwtService)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
     {
-        _jwtService = jwtService;
-    }
+        private readonly IJwtService _jwtService;
 
-    [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginRequest loginRequest)
-    {
-        // Basit demo amaçlı kullanıcı kontrolü ve rol ataması
-        UserRole assignedRole;
-
-        // Kullanıcı adı/parola kontrolü ve role belirleme
-        if (loginRequest.Username == "admin" && loginRequest.Password == "123")
+        public AuthController(IJwtService jwtService)
         {
-            assignedRole = UserRole.Author; // Tüm işlemlere yetkili
-        }
-        else if (loginRequest.Username == "user" && loginRequest.Password == "123")
-        {
-            assignedRole = UserRole.User; // Yorum ve Get işlemleri
-        }
-        else if (loginRequest.Username == "outsider" && loginRequest.Password == "123")
-        {
-            assignedRole = UserRole.Outsider; // Sadece Get işlemleri
-        }
-        else
-        {
-            return Unauthorized("Geçersiz kullanıcı adı veya şifre.");
+            _jwtService = jwtService;
         }
 
-        // Token üretilirken kullanıcı adı ve rol bilgisi verilir
-        var token = _jwtService.GenerateToken(loginRequest.Username, assignedRole);
-        return Ok(new { token });
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] LoginDto loginDto)
+        {
+            // Gerçek uygulamada burada kullanıcı veritabanından doğrulanmalı
+            if (loginDto.Username == "testuser" && loginDto.Password == "1234")
+            {
+                // Diyelim ki bu bilgilerle bir kullanıcı bulundu:
+                var user = new UserDto
+                {
+                    Id = Guid.NewGuid(),
+                    Username = "testuser",
+                    Email = "test@example.com",
+                    Role = UserRole.Author // Örnek olarak Author
+                };
+
+                var token = _jwtService.GenerateToken(user);
+                return Ok(new { token });
+            }
+
+            return Unauthorized("Kullanıcı adı veya şifre hatalı.");
+        }
     }
 }

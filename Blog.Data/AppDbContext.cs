@@ -13,6 +13,7 @@ namespace Blog.Data
         public DbSet<Post> Posts => Set<Post>();
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Comment> Comments => Set<Comment>();
+        public DbSet<User> Users => Set<User>(); // Kullanıcılar için DbSet tanımı
 
         // Fluent API ile konfigürasyonlar ve seed veriler
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,14 +33,18 @@ namespace Blog.Data
                 entity.HasKey(p => p.Id);
                 entity.Property(p => p.Title).IsRequired().HasMaxLength(200);
                 entity.Property(p => p.Content).IsRequired();
-                entity.Property(p => p.Author).IsRequired().HasMaxLength(100);
                 entity.Property(p => p.CreatedAt).IsRequired();
 
-                // Bir post bir kategoriye aittir
                 entity.HasOne(p => p.Category)
                       .WithMany(c => c.Posts)
                       .HasForeignKey(p => p.CategoryId);
+
+                // Yeni: User ile ilişki kuruluyor
+                entity.HasOne(p => p.User)
+                      .WithMany(u => u.Posts)
+                      .HasForeignKey(p => p.UserId);
             });
+
 
             // Comment entity konfigürasyonu
             modelBuilder.Entity<Comment>(entity =>
@@ -52,6 +57,19 @@ namespace Blog.Data
                 entity.HasOne(c => c.Post)
                       .WithMany(p => p.Comments)
                       .HasForeignKey(c => c.PostId);
+            });
+
+            // User entity konfigürasyonu
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(u => u.Id); // Primary key
+                entity.Property(u => u.Username).IsRequired().HasMaxLength(50); // Kullanıcı adı zorunlu
+                entity.Property(u => u.Email).IsRequired().HasMaxLength(100);   // E-posta zorunlu
+                entity.Property(u => u.Password).IsRequired();              // Şifre hash'i zorunlu
+                entity.Property(u => u.Role).IsRequired();                      // Rol zorunlu
+
+                // E-posta tekil olmalı
+                entity.HasIndex(u => u.Email).IsUnique();
             });
         }
     }
