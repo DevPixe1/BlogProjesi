@@ -1,6 +1,7 @@
 ﻿using Blog.Core.Entities;
 using Blog.Core.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace Blog.Data.Repositories
 {
@@ -15,8 +16,16 @@ namespace Blog.Data.Repositories
 
         public async Task<User?> GetByUsernameAndPasswordAsync(string username, string password)
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == username && u.Password == password);
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == username);
+
+            if (user == null) return null;
+
+            // Şifre doğrulama (veritabanındaki hash ile karşılaştırılır)
+            var passwordHasher = new PasswordHasher<User>();
+            var result = passwordHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+
+            return result == PasswordVerificationResult.Success ? user : null;
         }
     }
 }

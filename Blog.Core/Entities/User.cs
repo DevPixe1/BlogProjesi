@@ -14,7 +14,7 @@ namespace Blog.Core.Entities
         public string Email { get; set; } = string.Empty;
 
         // Şifre hash değeri (şifre düz metin olarak tutulmaz)
-        public string Password { get; set; } = string.Empty;
+        public string PasswordHash { get; set; } = string.Empty;
 
         // Kullanıcının rolü (Outsider, User, Author gibi)
         public UserRole Role { get; set; }

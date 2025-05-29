@@ -1,6 +1,7 @@
 ﻿using Blog.Core.DTOs;
 using Blog.Core.Enums;
 using Blog.Core.Interfaces;
+using Blog.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Blog.API.Controllers
@@ -10,32 +11,25 @@ namespace Blog.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IJwtService _jwtService;
+        private readonly IUserService _userService;
 
-        public AuthController(IJwtService jwtService)
+        public AuthController(IJwtService jwtService, IUserService userService)
         {
             _jwtService = jwtService;
+            _userService = userService;
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            // Gerçek uygulamada burada kullanıcı veritabanından doğrulanmalı
-            if (loginDto.Username == "testuser" && loginDto.Password == "1234")
-            {
-                // Diyelim ki bu bilgilerle bir kullanıcı bulundu:
-                var user = new UserDto
-                {
-                    Id = Guid.NewGuid(),
-                    Username = "testuser",
-                    Email = "test@example.com",
-                    Role = UserRole.Author // Örnek olarak Author
-                };
+            // Gerçek kullanıcı doğrulaması yapılır
+            var user = await _userService.AuthenticateAsync(loginDto.Username, loginDto.Password);
 
-                var token = _jwtService.GenerateToken(user);
-                return Ok(new { token });
-            }
+            if (user == null)
+                return Unauthorized("Kullanıcı adı veya şifre hatalı.");
 
-            return Unauthorized("Kullanıcı adı veya şifre hatalı.");
+            var token = _jwtService.GenerateToken(user);
+            return Ok(new { token });
         }
     }
 }

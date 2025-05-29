@@ -65,7 +65,7 @@ namespace Blog.Data
                 entity.HasKey(u => u.Id); // Primary key
                 entity.Property(u => u.Username).IsRequired().HasMaxLength(50); // Kullanıcı adı zorunlu
                 entity.Property(u => u.Email).IsRequired().HasMaxLength(100);   // E-posta zorunlu
-                entity.Property(u => u.Password).IsRequired();              // Şifre hash'i zorunlu
+                entity.Property(u => u.PasswordHash).IsRequired();              // Şifre hash'i zorunlu
                 entity.Property(u => u.Role).IsRequired();                      // Rol zorunlu
 
                 // E-posta tekil olmalı

@@ -18,7 +18,7 @@ namespace Blog.API.Controllers
         }
 
         // Tüm blog gönderilerini getirir
-        [HttpGet("Hepsini getir")]
+        [HttpGet]
         [AllowAnonymous] // Herkes erişebilir (Outsider dahil)
         public async Task<IActionResult> GetAll()
         {
@@ -42,8 +42,6 @@ namespace Blog.API.Controllers
         public async Task<IActionResult> Create([FromBody] CreatePostDto dto)
         {
             var postId = await _postService.CreateAsync(dto);
-
-            // Route parametresini "guid" olarak eşleştiriyoruz
             return CreatedAtAction(nameof(GetById), new { guid = postId }, null);
         }
 

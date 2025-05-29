@@ -4,6 +4,8 @@ using Blog.Core.Enums;
 using Blog.Core.Interfaces;
 using Blog.Core.Repositories;
 using Blog.Core.Services;
+using Blog.Service.Helpers;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Blog.Service.Services
@@ -20,17 +22,22 @@ namespace Blog.Service.Services
         // Yeni kullanıcıyı veritabanına kaydeder
         public async Task RegisterAsync(RegisterUserDto dto)
         {
+            var passwordHasher = new PasswordHasher<User>();
+
             var user = new User
             {
                 Id = Guid.NewGuid(),
                 Username = dto.Username,
                 Email = dto.Email,
-                Password = dto.Password, // Gerçek uygulamada hashlenmeli!
+                PasswordHash = PasswordHasher.Hash(dto.Password), // Şifreyi hashle
                 Role = dto.Role
             };
 
+            user.PasswordHash = passwordHasher.HashPassword(user, dto.Password);
+
             await _userRepository.AddAsync(user);
         }
+
 
         // Kullanıcı adı ve şifre ile giriş kontrolü (önceden eklenmişti)
         public async Task<UserDto?> AuthenticateAsync(string username, string password)

@@ -1,4 +1,5 @@
 ﻿using Blog.Core.DTOs;
+using Blog.Core.Entities;
 
 namespace Blog.Core.Services
 {
