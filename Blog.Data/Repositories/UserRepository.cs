@@ -2,6 +2,7 @@
 using Blog.Core.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using System.Linq.Expressions;
 
 namespace Blog.Data.Repositories
 {
@@ -27,5 +28,10 @@ namespace Blog.Data.Repositories
 
             return result == PasswordVerificationResult.Success ? user : null;
         }
+        public async Task<bool> AnyAsync(Expression<Func<User, bool>> predicate)
+        {
+            return await _context.Users.AnyAsync(predicate);
+        }
+
     }
 }

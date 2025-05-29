@@ -1,5 +1,4 @@
 ﻿using Blog.Core.DTOs;
-using Blog.Core.Enums;
 using Blog.Core.Interfaces;
 using Blog.Core.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -19,10 +18,10 @@ namespace Blog.API.Controllers
             _userService = userService;
         }
 
+        // Kullanıcı giriş işlemi
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            // Gerçek kullanıcı doğrulaması yapılır
             var user = await _userService.AuthenticateAsync(loginDto.Username, loginDto.Password);
 
             if (user == null)
@@ -30,6 +29,20 @@ namespace Blog.API.Controllers
 
             var token = _jwtService.GenerateToken(user);
             return Ok(new { token });
+        }
+
+        // Kullanıcı kayıt işlemi
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
+        {
+            // Kullanıcı adı veya e-posta zaten var mı kontrol edilir
+            var exists = await _userService.UserExistsAsync(dto.Username, dto.Email);
+            if (exists)
+                return BadRequest("Bu kullanıcı adı veya e-posta zaten kayıtlı.");
+
+            // Yeni kullanıcı kaydedilir
+            await _userService.RegisterAsync(dto);
+            return Ok("Kayıt başarılı.");
         }
     }
 }

@@ -29,7 +29,6 @@ namespace Blog.Service.Services
                 Id = Guid.NewGuid(),
                 Username = dto.Username,
                 Email = dto.Email,
-                PasswordHash = PasswordHasher.Hash(dto.Password), // Şifreyi hashle
                 Role = dto.Role
             };
 
@@ -38,8 +37,13 @@ namespace Blog.Service.Services
             await _userRepository.AddAsync(user);
         }
 
+        // Kullanıcı adı veya e-posta zaten var mı kontrol eder
+        public async Task<bool> UserExistsAsync(string username, string email)
+        {
+            return await _userRepository.AnyAsync(u => u.Username == username || u.Email == email);
+        }
 
-        // Kullanıcı adı ve şifre ile giriş kontrolü (önceden eklenmişti)
+        // Kullanıcı adı ve şifre ile giriş kontrolü
         public async Task<UserDto?> AuthenticateAsync(string username, string password)
         {
             var user = await _userRepository.GetByUsernameAndPasswordAsync(username, password);
