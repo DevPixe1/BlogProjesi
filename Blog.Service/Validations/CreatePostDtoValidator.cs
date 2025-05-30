@@ -14,9 +14,6 @@ namespace Blog.Service.Validations
             RuleFor(x => x.Content)
                 .NotEmpty().WithMessage("İçerik boş olamaz.");
 
-            RuleFor(x => x.Author)
-                .NotEmpty().WithMessage("Yazar boş olamaz.");
-
             RuleFor(x => x.CategoryId)
                 .GreaterThan(0).WithMessage("Kategori seçilmelidir.");
         }

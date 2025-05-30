@@ -41,7 +41,8 @@ namespace Blog.API.Controllers
         [Authorize(Roles = "Author")] // Sadece Author oluşturabilir
         public async Task<IActionResult> Create([FromBody] CreatePostDto dto)
         {
-            var postId = await _postService.CreateAsync(dto);
+            var userId = GetUserIdFromToken(); // JWT'den userId çekiliyor
+            var postId = await _postService.CreateAsync(dto, userId); // userId ile birlikte gönderiliyor
             return CreatedAtAction(nameof(GetById), new { guid = postId }, null);
         }
 
@@ -64,5 +65,11 @@ namespace Blog.API.Controllers
             if (!result) return NotFound(); // Silinecek gönderi yoksa 404 döner
             return NoContent(); // Başarılı silme işleminde içerik dönülmez
         }
+        private Guid GetUserIdFromToken()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            return userIdClaim != null ? Guid.Parse(userIdClaim.Value) : Guid.Empty;
+        }
+
     }
 }

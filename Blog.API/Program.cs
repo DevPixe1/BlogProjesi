@@ -13,6 +13,7 @@ using Blog.Service.Services; // JwtService
 using Microsoft.OpenApi.Models;
 using Blog.Core.Repositories;
 using Blog.Data.Repositories;
+using Blog.Core.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +22,8 @@ builder.Services.AddProjectServices(builder.Configuration);
 
 // JWT ayarlarýný appsettings.json'dan okur ve DI container'a ekler
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-
-// JwtService'i IOC container'a ekler
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();

@@ -36,11 +36,21 @@ namespace Blog.Service.Services
         }
 
         // Yeni bir post oluşturur ve ID’sini döner
-        public async Task<Guid> CreateAsync(CreatePostDto dto)
+        public async Task<Guid> CreateAsync(CreatePostDto dto, Guid userId)
         {
-            var post = _mapper.Map<Post>(dto);
-            post.Id = Guid.NewGuid();
-            post.CreatedAt = DateTime.UtcNow;
+            // JWT'den User'ı çekiyoruz (username de dahil)
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+
+            var post = new Post
+            {
+                Id = Guid.NewGuid(),
+                Title = dto.Title,
+                Content = dto.Content,
+                CategoryId = dto.CategoryId,
+                UserId = userId,
+                Author = user.Username, // Otomatik olarak username atanıyor
+                CreatedAt = DateTime.UtcNow
+            };
 
             await _unitOfWork.Posts.AddAsync(post);
             await _unitOfWork.SaveChangesAsync();
