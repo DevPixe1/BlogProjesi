@@ -4,7 +4,8 @@
     {
         // Her post için benzersiz kimlik (GUID tipinde)
         public Guid Id { get; set; }
-
+        // Post yazarı
+        public string Author { get; set; } = string.Empty;
         // Post başlığı
         public string Title { get; set; } = string.Empty;
 

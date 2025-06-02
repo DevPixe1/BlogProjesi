@@ -4,14 +4,10 @@ namespace Blog.Core.Services
 {
     public interface ICommentService
     {
-        // Yeni bir yorum ekler.
-        Task AddCommentAsync(CreateCommentDto dto);
-        Task UpdateCommentAsync(Guid commentId, UpdateCommentDto dto);
-        Task DeleteCommentAsync(Guid commentId);
-        // Belirli bir gönderiye (post) ait tüm yorumları getirir.
-        // ICommentService.cs
-        Task<IEnumerable<CommentDto>> GetCommentsByPostIdAsync(Guid postId);
-
+        Task AddCommentAsync(CreateCommentDto dto); // Yorum ekleme
+        Task UpdateCommentAsync(Guid commentId, UpdateCommentDto dto); // Yorum güncelleme
+        Task DeleteCommentAsync(Guid commentId); // Yorum silme
+        Task<IEnumerable<CommentDto>> GetCommentsByPostIdAsync(Guid postId); // Belirli gönderiye ait yorumları getirme
     }
-
 }
+

@@ -5,7 +5,6 @@
     {
         public string Title { get; set; } = null!;       // Yeni gönderi başlığı
         public string Content { get; set; } = null!;     // Yeni gönderi içeriği
-        public string Author { get; set; } = null!;      // Yeni gönderi yazarı
         public int CategoryId { get; set; }              // Yeni gönderinin kategorisi
     }
 }

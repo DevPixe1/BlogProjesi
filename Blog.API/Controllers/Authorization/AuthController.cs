@@ -27,7 +27,16 @@ namespace Blog.API.Controllers
             if (user == null)
                 return Unauthorized("Kullanıcı adı veya şifre hatalı.");
 
-            var token = _jwtService.GenerateToken(user);
+            // Map to UserInfoDto to send non-sensitive data
+            var userInfo = new UserInfoDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                Role = user.Role
+            };
+
+            var token = _jwtService.GenerateToken(userInfo);
             return Ok(new { token });
         }
 
@@ -35,12 +44,10 @@ namespace Blog.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
         {
-            // Kullanıcı adı veya e-posta zaten var mı kontrol edilir
             var exists = await _userService.UserExistsAsync(dto.Username, dto.Email);
             if (exists)
                 return BadRequest("Bu kullanıcı adı veya e-posta zaten kayıtlı.");
 
-            // Yeni kullanıcı kaydedilir
             await _userService.RegisterAsync(dto);
             return Ok("Kayıt başarılı.");
         }

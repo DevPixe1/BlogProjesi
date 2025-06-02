@@ -1,29 +1,32 @@
 ﻿using Blog.Core.DTOs;
 using Blog.Core.Entities;
 using Blog.Core.Enums;
+using Blog.Core.Exceptions; // Added for NotFoundException
 using Blog.Core.Interfaces;
 using Blog.Core.Repositories;
 using Blog.Core.Services;
 using Blog.Service.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Threading.Tasks;
 
 namespace Blog.Service.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly PasswordHasher<User> _passwordHasher;
 
         public UserService(IUserRepository userRepository)
         {
             _userRepository = userRepository;
+            _passwordHasher = new PasswordHasher<User>();
         }
 
         // Yeni kullanıcıyı veritabanına kaydeder
         public async Task RegisterAsync(RegisterUserDto dto)
         {
-            var passwordHasher = new PasswordHasher<User>();
-
             var user = new User
             {
                 Id = Guid.NewGuid(),
@@ -32,7 +35,7 @@ namespace Blog.Service.Services
                 Role = dto.Role
             };
 
-            user.PasswordHash = passwordHasher.HashPassword(user, dto.Password);
+            user.PasswordHash = _passwordHasher.HashPassword(user, dto.Password);
 
             await _userRepository.AddAsync(user);
         }
@@ -56,6 +59,17 @@ namespace Blog.Service.Services
                 Email = user.Email,
                 Role = user.Role
             };
+        }
+
+        // Yeni eklenen method: ID ile kullanıcıyı getirir
+        public async Task<User> GetByIdAsync(Guid userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found. Cannot create a post without a valid user.");
+            }
+            return user;
         }
     }
 }

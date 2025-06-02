@@ -15,27 +15,29 @@ public class JwtService : IJwtService
     {
         _jwtSettings = jwtSettings.Value;
     }
-
-    public string GenerateToken(UserDto user)
+    public string GenerateToken(UserInfoDto user)
     {
+        // Kullanıcı bilgileri üzerinden JWT claim'leri oluşturur
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim("UserId", user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.Role.ToString()) // Rol burada yer alıyor
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Kullanıcı ID
+            new Claim("UserId", user.Id.ToString()), // Alternatif kullanıcı ID
+            new Claim(ClaimTypes.Name, user.Username), // Kullanıcı adı
+            new Claim(ClaimTypes.Email, user.Email), // E-posta adresi
+            new Claim(ClaimTypes.Role, user.Role.ToString()) // Kullanıcı rolü
         };
 
+        // JWT imzalama anahtarını oluşturur
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+        // JWT belirteci oluşturur
         var token = new JwtSecurityToken(
-            issuer: _jwtSettings.Issuer,
-            audience: _jwtSettings.Audience,
-            claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpireMinutes),
-            signingCredentials: creds
+            issuer: _jwtSettings.Issuer, // Token yayıncısı
+            audience: _jwtSettings.Audience, // Token hedef kitlesi
+            claims: claims, // Kullanıcıya ait claim'ler
+            expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpireMinutes), // Token geçerlilik süresi
+            signingCredentials: creds // İmzalama bilgileri
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);

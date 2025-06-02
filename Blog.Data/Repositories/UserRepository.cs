@@ -1,7 +1,7 @@
 ﻿using Blog.Core.Entities;
 using Blog.Core.Repositories;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Blog.Data.Repositories
@@ -14,7 +14,12 @@ namespace Blog.Data.Repositories
         {
             _context = context;
         }
-
+        // Kullanıcıyı ID'ye göre getirir
+        public async Task<User?> GetByIdAsync(Guid id)
+        {
+            return await _context.Users.FindAsync(id);
+        }
+        // Kullanıcı adı ve şifreye göre doğrulama yapar
         public async Task<User?> GetByUsernameAndPasswordAsync(string username, string password)
         {
             var user = await _context.Users
@@ -28,10 +33,10 @@ namespace Blog.Data.Repositories
 
             return result == PasswordVerificationResult.Success ? user : null;
         }
+        // Belirtilen koşulu sağlayan herhangi bir kullanıcı olup olmadığını kontrol eder
         public async Task<bool> AnyAsync(Expression<Func<User, bool>> predicate)
         {
             return await _context.Users.AnyAsync(predicate);
         }
-
     }
 }

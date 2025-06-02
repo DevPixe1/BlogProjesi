@@ -1,13 +1,16 @@
 ﻿using Blog.Core.DTOs;
 using Blog.Core.Entities;
 using Blog.Core.Repositories;
+using System;
+using System.Threading.Tasks;
 
 namespace Blog.Core.Services
 {
     public interface IUserService
     {
-        Task RegisterAsync(RegisterUserDto dto); // Yeni kullanıcı kaydı
-        Task<UserDto?> AuthenticateAsync(string username, string password); // Giriş işlemi
-        Task<bool> UserExistsAsync(string username, string email); // Aynı kullanıcı adı veya e-posta var mı kontrolü
+        Task RegisterAsync(RegisterUserDto dto); // Kullanıcı kaydı yapar
+        Task<UserDto?> AuthenticateAsync(string username, string password); // Kullanıcı adı ve şifre ile doğrulama yapar
+        Task<bool> UserExistsAsync(string username, string email); // Kullanıcının mevcut olup olmadığını kontrol eder
+        Task<User> GetByIdAsync(Guid userId); // Kullanıcıyı ID ile getirir
     }
 }

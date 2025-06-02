@@ -15,6 +15,7 @@ namespace Blog.Data.UnitOfWork
         public IGenericRepository<Post> Posts { get; }
         public IGenericRepository<Comment> Comments { get; }
         public IGenericRepository<Category> Categories { get; }
+        public IUserRepository Users { get; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -24,6 +25,8 @@ namespace Blog.Data.UnitOfWork
             Posts = new GenericRepository<Post>(_context);
             Comments = new GenericRepository<Comment>(_context);
             Categories = new GenericRepository<Category>(_context);
+            Users = new UserRepository(context);
+
         }
 
         // Değişiklikleri veritabanına kaydeder
