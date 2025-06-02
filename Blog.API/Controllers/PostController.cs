@@ -1,5 +1,6 @@
-﻿using Blog.Core.DTOs;
-using Blog.Core.Entities;
+﻿using Blog.Core.Enums;
+using Blog.Service.Authorization;
+using Blog.Core.DTOs;
 using Blog.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -40,19 +41,20 @@ namespace Blog.API.Controllers
 
         // Yeni bir gönderi oluşturur
         [HttpPost]
-        [Authorize(Roles = "Author")]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] CreatePostDto dto)
         {
-            Guid userId;
             try
             {
-                userId = GetUserIdFromToken(); // JWT belirtecinden geçerli bir kullanıcı kimliği çıkar.
+                var userRole = (UserRole)Enum.Parse(typeof(UserRole), User.FindFirstValue(ClaimTypes.Role) ?? "0");
+                RoleAuthorizationService.EnsureUserHasPermission(userRole, UserRole.Author); // Yazar yetkisi gerekiyor
             }
-            catch (Exception ex)
+            catch (UnauthorizedAccessException ex)
             {
-                return BadRequest(ex.Message);
+                return Unauthorized(ex.Message);
             }
 
+            var userId = GetUserIdFromToken();
             var postId = await _postService.CreateAsync(dto, userId);
             return CreatedAtAction(nameof(GetById), new { guid = postId }, null);
         }
@@ -70,9 +72,19 @@ namespace Blog.API.Controllers
 
         // Belirli bir gönderiyi siler
         [HttpDelete("{guid}")]
-        [Authorize(Roles = "Author")]
+        [Authorize]
         public async Task<IActionResult> Delete(Guid guid)
         {
+            try
+            {
+                var userRole = (UserRole)Enum.Parse(typeof(UserRole), User.FindFirstValue(ClaimTypes.Role) ?? "0");
+                RoleAuthorizationService.EnsureUserHasPermission(userRole, UserRole.Author);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+
             var result = await _postService.DeleteAsync(guid);
             if (!result)
                 return NotFound();
