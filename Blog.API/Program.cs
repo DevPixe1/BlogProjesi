@@ -26,8 +26,6 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-
 // Yetkilendirme servisini ekler (rollerin çalýþmasý için gereklidir)
 builder.Services.AddAuthorization();
 
@@ -40,6 +38,11 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(options =>
 {
     var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+    if (jwtSettings == null)
+    {
+        throw new InvalidOperationException("JWT ayarlarý bulunamadý, lütfen appsettings.json dosyanýzý kontrol edin.");
+    }
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -100,7 +103,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication(); // JWT doðrulama iþlemini aktive eder
-app.UseAuthorization();  // Yetki kontrolü (örneðin [Authorize]) burada devreye girer
+app.UseAuthorization();  // Yetki kontrolü burada devreye girer
 
 app.MapControllers();
 

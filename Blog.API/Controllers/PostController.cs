@@ -98,6 +98,11 @@ namespace Blog.API.Controllers
         // Metod, geçerli bir kullanıcı GUID'si döndürür.
         private Guid GetUserIdFromToken()
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                throw new UnauthorizedAccessException("Kullanıcı kimliği doğrulanmadı.");
+            }
+
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)
                 ?? User.Claims.FirstOrDefault(c => c.Type == "UserId");
 
@@ -113,5 +118,6 @@ namespace Blog.API.Controllers
 
             return userId;
         }
+
     }
 }
