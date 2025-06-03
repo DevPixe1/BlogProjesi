@@ -30,14 +30,6 @@ namespace Blog.Service.Mapping
             // Kullanıcı kayıt/giriş işlemleri için dönüşüm.
             // UserDto nesnesinden User entity'sine dönüşüm yapılır (şifre ve rol bilgilerini içerir).
             CreateMap<UserDto, User>();
-
-            // Yanıtlar için dönüşüm.
-            // User entity'sinden UserInfoDto'ya dönüşüm yapılır, 
-            // böylece hassas bilgiler (düz metin şifre gibi) hariç tutulur.
-            CreateMap<User, UserInfoDto>();
-
-            // Opsiyonel: Eğer doğrudan UserDto'dan UserInfoDto'ya dönüşüm gerekirse:
-            CreateMap<UserDto, UserInfoDto>();
         }
     }
 }

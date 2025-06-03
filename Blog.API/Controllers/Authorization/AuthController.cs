@@ -27,16 +27,7 @@ namespace Blog.API.Controllers
             if (user == null)
                 return Unauthorized("Kullanıcı adı veya şifre hatalı.");
 
-            // Map to UserInfoDto to send non-sensitive data
-            var userInfo = new UserInfoDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                Role = user.Role
-            };
-
-            var token = _jwtService.GenerateToken(userInfo);
+            var token = _jwtService.GenerateToken(user.Id, user.Username, user.Role);
             return Ok(new { token });
         }
 

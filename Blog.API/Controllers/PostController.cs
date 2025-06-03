@@ -44,20 +44,20 @@ namespace Blog.API.Controllers
         [Authorize]
         public async Task<IActionResult> Create([FromBody] CreatePostDto dto)
         {
-            try
-            {
-                var userRole = (UserRole)Enum.Parse(typeof(UserRole), User.FindFirstValue(ClaimTypes.Role) ?? "0");
-                RoleAuthorizationService.EnsureUserHasPermission(userRole, UserRole.Author); // Yazar yetkisi gerekiyor
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+                return Unauthorized("Geçersiz kullanıcı ID.");
 
-            var userId = GetUserIdFromToken();
-            var postId = await _postService.CreateAsync(dto, userId);
+            var usernameClaim = User.FindFirst(ClaimTypes.Name);
+            if (usernameClaim == null)
+                return Unauthorized("Kullanıcı adı bulunamadı.");
+
+            // Post oluşturuluyor, Author ve UserId token'dan çekiliyor
+            var postId = await _postService.CreateAsync(dto, userId, usernameClaim.Value);
+
             return CreatedAtAction(nameof(GetById), new { guid = postId }, null);
         }
+
 
         // Var olan bir gönderiyi günceller
         [HttpPut("{guid}")]
@@ -118,6 +118,5 @@ namespace Blog.API.Controllers
 
             return userId;
         }
-
     }
 }

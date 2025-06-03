@@ -36,24 +36,16 @@ namespace Blog.Service.Services
         }
 
         // Yeni bir post oluşturur ve ID’sini döner
-        public async Task<Guid> CreateAsync(CreatePostDto dto, Guid userId)
+        public async Task<Guid> CreateAsync(CreatePostDto dto, Guid userId, string username)
         {
-            // JWT'den User'ı çekiyoruz (username de dahil)
-            var user = await _unitOfWork.Users.GetByIdAsync(userId);
-            if (user == null)
-            {
-                // Handle the error gracefully. You can throw a custom exception, return an error code, or log the issue.
-                throw new Exception("Kullanıcı bulunamadı. Geçerli bir kullanıcı olmadan gönderi oluşturulamaz.");
-            }
-
             var post = new Post
             {
                 Id = Guid.NewGuid(),
                 Title = dto.Title,
                 Content = dto.Content,
                 CategoryId = dto.CategoryId,
-                UserId = userId,
-                Author = user.Username, // Otomatik olarak username atanıyor
+                UserId = userId,    // Artık kullanıcı ID’si token’dan geliyor
+                Author = username,  // Kullanıcı adı da token’dan geliyor
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -61,7 +53,6 @@ namespace Blog.Service.Services
             await _unitOfWork.SaveChangesAsync();
             return post.Id;
         }
-
 
         // Postu günceller, işlem başarılıysa true döner
         public async Task<bool> UpdateAsync(Guid id, UpdatePostDto dto)
