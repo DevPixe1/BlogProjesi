@@ -35,7 +35,9 @@ namespace Blog.Service.Services
             return _mapper.Map<IEnumerable<PostDto>>(posts);
         }
 
-        // Yeni bir post oluşturur ve ID’sini döner
+        // **************** Güncellenmiş CreateAsync Metodu ****************
+        // Artık CreateAsync metoduna, JWT token'dan çekilen kullanıcı bilgilerini (userId, username)
+        // parametre olarak alarak, post oluşturma işleminde bu bilgileri ilgili alanlara atıyoruz.
         public async Task<Guid> CreateAsync(CreatePostDto dto, Guid userId, string username)
         {
             var post = new Post
@@ -44,8 +46,8 @@ namespace Blog.Service.Services
                 Title = dto.Title,
                 Content = dto.Content,
                 CategoryId = dto.CategoryId,
-                UserId = userId,    // Artık kullanıcı ID’si token’dan geliyor
-                Author = username,  // Kullanıcı adı da token’dan geliyor
+                UserId = userId,    // Token’dan alınan kullanıcı ID'si
+                Author = username,  // Token’dan alınan kullanıcı adı
                 CreatedAt = DateTime.UtcNow
             };
 

@@ -1,8 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Blog.Core.Configurations;
 using Blog.Core.DTOs;
+using Blog.Core.Configurations;
 using Blog.Core.Enums;
 using Blog.Core.Interfaces;
 using Microsoft.Extensions.Options;
@@ -16,14 +16,26 @@ public class JwtService : IJwtService
     {
         _jwtSettings = jwtSettings.Value;
     }
+
     public string GenerateToken(Guid userId, string username, UserRole role)
     {
+        // Gerçek kullanıcı bilgileri sağlanmadığında hata fırlatılıyor.
+        if (userId == Guid.Empty)
+            throw new ArgumentException("UserId cannot be empty.", nameof(userId));
+
+        if (string.IsNullOrWhiteSpace(username))
+            throw new ArgumentException("Username cannot be empty.", nameof(username));
+
+        // Standart claim türlerini kullanıyoruz. Bu sayede,
+        // token içerisindeki 'NameIdentifier' ve 'Name' claim'leri
+        // ASP.NET tarafından otomatik olarak normalize edilir.
         var claims = new List<Claim>
-    {
-        new Claim(ClaimTypes.NameIdentifier, userId.ToString()),  // Kullanıcının benzersiz kimliği
-        new Claim(ClaimTypes.Name, username),                     // Kullanıcı adı
-        new Claim(ClaimTypes.Role, role.ToString())               // Kullanıcının rolü
-    };
+        {
+            new Claim(ClaimTypes.NameIdentifier, userId.ToString()), 
+            new Claim(ClaimTypes.Name, username),                    
+            new Claim(ClaimTypes.Role, role.ToString()),             // Rol bilgisi
+            new Claim("sub", userId.ToString())                      // Alternatif identifier olarak "sub"
+        };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

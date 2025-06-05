@@ -67,7 +67,7 @@ namespace Blog.Service.Services
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
-                throw new NotFoundException("User not found. Cannot create a post without a valid user.");
+                throw new NotFoundException("Kullanıcı bulunamadı. Geçerli bir kullanıcı olmadan gönderi oluşturulamaz.");
             }
             return user;
         }

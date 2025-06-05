@@ -20,6 +20,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Proje servislerini merkezi olarak ekler (DbContext, AutoMapper, FluentValidation, Repos, Services, UnitOfWork vs.)
 builder.Services.AddProjectServices(builder.Configuration);
 
+// Kullanýcý Servisi & HttpContextAccessor**
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
 // JWT ayarlarýný appsettings.json'dan okur ve DI container'a ekler
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddScoped<IUserService, UserService>();

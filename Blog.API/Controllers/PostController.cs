@@ -4,7 +4,6 @@ using Blog.Core.DTOs;
 using Blog.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Blog.API.Controllers
 {
@@ -13,10 +12,12 @@ namespace Blog.API.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostService _postService;
+        private readonly ICurrentUserService _currentUserService;
 
-        public PostController(IPostService postService)
+        public PostController(IPostService postService, ICurrentUserService currentUserService)
         {
             _postService = postService;
+            _currentUserService = currentUserService;
         }
 
         // Tüm blog gönderilerini getirir
@@ -44,17 +45,17 @@ namespace Blog.API.Controllers
         [Authorize]
         public async Task<IActionResult> Create([FromBody] CreatePostDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
-                return Unauthorized("Geçersiz kullanıcı ID.");
+            // Debug için token içerisindeki tüm claim'leri yazdır
+            Console.WriteLine("=== Token Claims ===");
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+            }
 
-            var usernameClaim = User.FindFirst(ClaimTypes.Name);
-            if (usernameClaim == null)
-                return Unauthorized("Kullanıcı adı bulunamadı.");
+            if (_currentUserService.UserId == Guid.Empty || string.IsNullOrEmpty(_currentUserService.Username))
+                return Unauthorized("Geçersiz kullanıcı bilgisi.");
 
-            // Post oluşturuluyor, Author ve UserId token'dan çekiliyor
-            var postId = await _postService.CreateAsync(dto, userId, usernameClaim.Value);
-
+            var postId = await _postService.CreateAsync(dto, _currentUserService.UserId, _currentUserService.Username);
             return CreatedAtAction(nameof(GetById), new { guid = postId }, null);
         }
 
@@ -77,8 +78,8 @@ namespace Blog.API.Controllers
         {
             try
             {
-                var userRole = (UserRole)Enum.Parse(typeof(UserRole), User.FindFirstValue(ClaimTypes.Role) ?? "0");
-                RoleAuthorizationService.EnsureUserHasPermission(userRole, UserRole.Author);
+                // Role kontrolü artık ICurrentUserService üzerinden okunuyor
+                RoleAuthorizationService.EnsureUserHasPermission(_currentUserService.Role, UserRole.Author);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -91,32 +92,5 @@ namespace Blog.API.Controllers
             return NoContent();
         }
 
-        // JWT belirtecinden kullanıcı kimliğini çıkarmak için kullanılır.
-        // Bu metodda, kullanıcının "NameIdentifier" ya da "UserId" claim'leri aranır. 
-        // Eğer bu claim'lerden hiçbiri bulunamazsa veya claim değeri geçerli bir GUID formatında değilse,
-        // ilgili hata mesajı ile bir istisna fırlatılır.
-        // Metod, geçerli bir kullanıcı GUID'si döndürür.
-        private Guid GetUserIdFromToken()
-        {
-            if (!User.Identity.IsAuthenticated)
-            {
-                throw new UnauthorizedAccessException("Kullanıcı kimliği doğrulanmadı.");
-            }
-
-            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)
-                ?? User.Claims.FirstOrDefault(c => c.Type == "UserId");
-
-            if (userIdClaim == null)
-            {
-                throw new Exception("Token içinde kullanıcı tanımlayıcı bilgisi bulunamadı.");
-            }
-
-            if (!Guid.TryParse(userIdClaim.Value, out var userId))
-            {
-                throw new Exception("Kullanıcı tanımlayıcı bilgisi geçerli bir GUID formatında değil.");
-            }
-
-            return userId;
-        }
     }
 }
