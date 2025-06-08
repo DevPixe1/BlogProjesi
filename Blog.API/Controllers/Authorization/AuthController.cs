@@ -2,6 +2,7 @@
 using Blog.Core.Interfaces;
 using Blog.Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace Blog.API.Controllers
 {
@@ -27,7 +28,8 @@ namespace Blog.API.Controllers
             if (user == null)
                 return Unauthorized("Kullanıcı adı veya şifre hatalı.");
 
-            var token = _jwtService.GenerateToken(user.Id, user.Username, user.Role);
+            // Token üretiminde yalnızca username ve role kullanılıyor.
+            var token = _jwtService.GenerateToken(user.Username, user.Role);
             return Ok(new { token });
         }
 

@@ -7,7 +7,7 @@ namespace Blog.Core.Services
     {
         Task<IEnumerable<PostDto>> GetAllAsync();                    // Tüm postları DTO olarak getirir
         Task<PostDto?> GetByIdAsync(Guid id);                        // Belirli bir postu ID ile getirir
-        Task<Guid> CreateAsync(CreatePostDto dto, Guid userId, string username);      // Yeni bir post oluşturur (UserId eklendi)
+        Task<Guid> CreateAsync(CreatePostDto dto, string username);  // Yeni bir post oluşturur (UserId eklendi)
         Task<bool> UpdateAsync(Guid id, UpdatePostDto dto);          // Var olan bir postu günceller
         Task<bool> DeleteAsync(Guid id);                             // Belirli bir postu siler
     }

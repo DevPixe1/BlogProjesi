@@ -1,9 +1,10 @@
-﻿using Blog.Core.Enums;
-using Blog.Service.Authorization;
-using Blog.Core.DTOs;
+﻿using Blog.Core.DTOs;
+using Blog.Core.Interfaces;
 using Blog.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace Blog.API.Controllers
 {
@@ -12,12 +13,10 @@ namespace Blog.API.Controllers
     public class PostController : ControllerBase
     {
         private readonly IPostService _postService;
-        private readonly ICurrentUserService _currentUserService;
 
-        public PostController(IPostService postService, ICurrentUserService currentUserService)
+        public PostController(IPostService postService)
         {
             _postService = postService;
-            _currentUserService = currentUserService;
         }
 
         // Tüm blog gönderilerini getirir
@@ -29,7 +28,7 @@ namespace Blog.API.Controllers
             return Ok(posts);
         }
 
-        // Belirli bir gönderiyi GUID'e göre getirir
+        // Gönderiyi GUID'e göre getirir
         [HttpGet("{guid}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid guid)
@@ -40,27 +39,29 @@ namespace Blog.API.Controllers
             return Ok(post);
         }
 
-        // Yeni bir gönderi oluşturur
+        // Yeni gönderi oluşturur (sadece Author rolündeki kullanıcılar)
         [HttpPost]
-        [Authorize]
+        [Authorize(Roles = "Author")]
         public async Task<IActionResult> Create([FromBody] CreatePostDto dto)
         {
-            // Debug için token içerisindeki tüm claim'leri yazdır
+            // Log: Token içerisindeki claim'leri yazdırıyoruz. (Debug amacıyla)
             Console.WriteLine("=== Token Claims ===");
             foreach (var claim in User.Claims)
             {
                 Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
             }
 
-            if (_currentUserService.UserId == Guid.Empty || string.IsNullOrEmpty(_currentUserService.Username))
-                return Unauthorized("Geçersiz kullanıcı bilgisi.");
+            // Token'dan username bilgisini çekiyoruz.
+            var authorUsername = User.FindFirstValue(ClaimTypes.Name);
+            if (string.IsNullOrEmpty(authorUsername))
+                return Unauthorized("Token’da Name claim’i bulunamadı.");
 
-            var postId = await _postService.CreateAsync(dto, _currentUserService.UserId, _currentUserService.Username);
+            // Post servisine username’i gönderiyoruz.
+            var postId = await _postService.CreateAsync(dto, authorUsername);
             return CreatedAtAction(nameof(GetById), new { guid = postId }, null);
         }
 
-
-        // Var olan bir gönderiyi günceller
+        // Var olan gönderiyi günceller (sadece Author rolü)
         [HttpPut("{guid}")]
         [Authorize(Roles = "Author")]
         public async Task<IActionResult> Update(Guid guid, [FromBody] UpdatePostDto dto)
@@ -71,26 +72,15 @@ namespace Blog.API.Controllers
             return NoContent();
         }
 
-        // Belirli bir gönderiyi siler
+        // Gönderiyi siler (sadece Author rolü)
         [HttpDelete("{guid}")]
-        [Authorize]
+        [Authorize(Roles = "Author")]
         public async Task<IActionResult> Delete(Guid guid)
         {
-            try
-            {
-                // Role kontrolü artık ICurrentUserService üzerinden okunuyor
-                RoleAuthorizationService.EnsureUserHasPermission(_currentUserService.Role, UserRole.Author);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-
             var result = await _postService.DeleteAsync(guid);
             if (!result)
                 return NotFound();
             return NoContent();
         }
-
     }
 }

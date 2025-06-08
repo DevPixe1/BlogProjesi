@@ -15,9 +15,9 @@ namespace Blog.Data.Repositories
             _context = context;
         }
         // Kullanıcıyı ID'ye göre getirir
-        public async Task<User?> GetByIdAsync(Guid id)
+        public async Task<User?> GetByUsernameAsync(string username)
         {
-            return await _context.Users.FindAsync(id);
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
         // Kullanıcı adı ve şifreye göre doğrulama yapar
         public async Task<User?> GetByUsernameAndPasswordAsync(string username, string password)

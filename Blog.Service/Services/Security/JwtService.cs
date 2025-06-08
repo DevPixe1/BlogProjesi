@@ -1,7 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Blog.Core.DTOs;
 using Blog.Core.Configurations;
 using Blog.Core.Enums;
 using Blog.Core.Interfaces;
@@ -17,24 +16,20 @@ public class JwtService : IJwtService
         _jwtSettings = jwtSettings.Value;
     }
 
-    public string GenerateToken(Guid userId, string username, UserRole role)
+    // Artık userId parametresi yok, sadece username ve role alıyor
+    public string GenerateToken(string username, UserRole role)
     {
-        // Gerçek kullanıcı bilgileri sağlanmadığında hata fırlatılıyor.
-        if (userId == Guid.Empty)
-            throw new ArgumentException("UserId cannot be empty.", nameof(userId));
-
+        // Eğer gerçekten username boş gelirse hata fırlatabilirsiniz
         if (string.IsNullOrWhiteSpace(username))
-            throw new ArgumentException("Username cannot be empty.", nameof(username));
+            throw new ArgumentException("GenerateToken çağrılırken username boş olamaz.");
 
-        // Standart claim türlerini kullanıyoruz. Bu sayede,
-        // token içerisindeki 'NameIdentifier' ve 'Name' claim'leri
-        // ASP.NET tarafından otomatik olarak normalize edilir.
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString()), 
-            new Claim(ClaimTypes.Name, username),                    
-            new Claim(ClaimTypes.Role, role.ToString()),             // Rol bilgisi
-            new Claim("sub", userId.ToString())                      // Alternatif identifier olarak "sub"
+            // Kullanıcının adı
+            new Claim(ClaimTypes.Name, username),
+
+            // Kullanıcının rolü (örneğin "Author", "User", vb.)
+            new Claim(ClaimTypes.Role, role.ToString())
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));

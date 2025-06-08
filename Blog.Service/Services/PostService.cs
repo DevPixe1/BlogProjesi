@@ -3,6 +3,9 @@ using Blog.Core.DTOs;
 using Blog.Core.Entities;
 using Blog.Core.Services;
 using Blog.Core.UnitOfWork;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Blog.Service.Services
 {
@@ -12,11 +15,14 @@ namespace Blog.Service.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
 
-        public PostService(IUnitOfWork unitOfWork, IMapper mapper)
+        // IUserService parametresi eklenerek _userService alanı initialize ediliyor.
+        public PostService(IUnitOfWork unitOfWork, IMapper mapper, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userService = userService;
         }
 
         // ID ile post getirir, DTO'ya dönüştürür
@@ -35,19 +41,23 @@ namespace Blog.Service.Services
             return _mapper.Map<IEnumerable<PostDto>>(posts);
         }
 
-        // **************** Güncellenmiş CreateAsync Metodu ****************
-        // Artık CreateAsync metoduna, JWT token'dan çekilen kullanıcı bilgilerini (userId, username)
-        // parametre olarak alarak, post oluşturma işleminde bu bilgileri ilgili alanlara atıyoruz.
-        public async Task<Guid> CreateAsync(CreatePostDto dto, Guid userId, string username)
+        // Artık CreateAsync metoduna sadece DTO ve username alıyor; GUID (UserId) dışarıdan gelmiyor.
+        public async Task<Guid> CreateAsync(CreatePostDto dto, string username)
         {
+            var user = await _userService.GetByUsernameAsync(username);
+            if (user == null)
+            {
+                throw new Exception("Kullanıcı bulunamadı.");
+            }
+
             var post = new Post
             {
                 Id = Guid.NewGuid(),
                 Title = dto.Title,
                 Content = dto.Content,
                 CategoryId = dto.CategoryId,
-                UserId = userId,    // Token’dan alınan kullanıcı ID'si
-                Author = username,  // Token’dan alınan kullanıcı adı
+                UserId = user.Id, // Veritabanındaki geçerli kullanıcı id'si
+                Author = user.Username,
                 CreatedAt = DateTime.UtcNow
             };
 

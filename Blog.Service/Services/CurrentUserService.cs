@@ -1,5 +1,4 @@
 ﻿using Blog.Core.Enums;
-using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 
@@ -14,19 +13,11 @@ namespace Blog.Core.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Guid UserId
-        {
-            get
-            {
-                var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst("nameid")
-                    ?? _httpContextAccessor.HttpContext?.User.FindFirst("sub"); // Alternatif kontrol
-
-                return (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var id)) ? id : Guid.Empty;
-            }
-        }
+        // GUID mantığı tamamen kaldırıldı; artık UserId dönmüyor.
+        // Eğer interface’de UserId zorunluysa, bu kısmı ICurrentUserService’ten de silmeniz gerekir.
 
         public string Username =>
-            _httpContextAccessor.HttpContext?.User.FindFirst("unique_name")?.Value // Token'daki uygun claim
+            _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Name)?.Value
             ?? string.Empty;
 
         public UserRole Role
@@ -38,5 +29,4 @@ namespace Blog.Core.Services
             }
         }
     }
-
 }

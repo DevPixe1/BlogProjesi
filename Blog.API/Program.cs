@@ -29,6 +29,8 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 
 // Yetkilendirme servisini ekler (rollerin çalýþmasý için gereklidir)
 builder.Services.AddAuthorization();

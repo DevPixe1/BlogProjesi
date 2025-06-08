@@ -1,11 +1,10 @@
 ﻿using Blog.Core.DTOs;
 using Blog.Core.Entities;
 using Blog.Core.Enums;
-using Blog.Core.Exceptions; // Added for NotFoundException
+using Blog.Core.Exceptions; // NotFoundException için
 using Blog.Core.Interfaces;
 using Blog.Core.Repositories;
 using Blog.Core.Services;
-using Blog.Service.Helpers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -51,7 +50,8 @@ namespace Blog.Service.Services
         {
             var user = await _userRepository.GetByUsernameAndPasswordAsync(username, password);
 
-            if (user == null) return null;
+            if (user == null)
+                return null;
 
             return new UserDto
             {
@@ -61,15 +61,21 @@ namespace Blog.Service.Services
             };
         }
 
-        // Yeni eklenen method: ID ile kullanıcıyı getirir
+        // ID ile kullanıcıyı getirir
         public async Task<User> GetByIdAsync(Guid userId)
         {
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
             {
-                throw new NotFoundException("Kullanıcı bulunamadı. Geçerli bir kullanıcı olmadan gönderi oluşturulamaz.");
+                throw new NotFoundException("User not found.");
             }
             return user;
+        }
+
+        // Username ile kullanıcıyı getirir (Mevcut tanımlı metodu kullanıyoruz)
+        public async Task<User?> GetByUsernameAsync(string username)
+        {
+            return await _userRepository.GetByUsernameAsync(username);
         }
     }
 }

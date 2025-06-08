@@ -5,6 +5,6 @@ namespace Blog.Core.Interfaces
 {
     public interface IJwtService
     {
-        string GenerateToken(Guid userId, string username, UserRole role);
+        string GenerateToken(string username, UserRole role);
     }
 }
