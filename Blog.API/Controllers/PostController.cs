@@ -58,7 +58,8 @@ namespace Blog.API.Controllers
 
             // Post servisine username’i gönderiyoruz.
             var postId = await _postService.CreateAsync(dto, authorUsername);
-            return CreatedAtAction(nameof(GetById), new { guid = postId }, null);
+            return CreatedAtAction(nameof(GetById), new { guid = postId }, "Gönderi başarıyla oluşturuldu.");
+
         }
 
         // Var olan gönderiyi günceller (sadece Author rolü)
@@ -69,8 +70,9 @@ namespace Blog.API.Controllers
             var result = await _postService.UpdateAsync(guid, dto);
             if (!result)
                 return NotFound();
-            return NoContent();
+            return Ok("Gönderi başarıyla güncellendi.");
         }
+
 
         // Gönderiyi siler (sadece Author rolü)
         [HttpDelete("{guid}")]
@@ -80,7 +82,7 @@ namespace Blog.API.Controllers
             var result = await _postService.DeleteAsync(guid);
             if (!result)
                 return NotFound();
-            return NoContent();
+            return Ok("Gönderi başarıyla silindi.");
         }
     }
 }

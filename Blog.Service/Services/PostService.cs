@@ -57,7 +57,6 @@ namespace Blog.Service.Services
                 Content = dto.Content,
                 CategoryId = dto.CategoryId,
                 UserId = user.Id, // Veritabanındaki geçerli kullanıcı id'si
-                Author = user.Username,
                 CreatedAt = DateTime.UtcNow
             };
 
