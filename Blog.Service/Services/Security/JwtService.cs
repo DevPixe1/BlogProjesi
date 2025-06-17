@@ -16,7 +16,7 @@ public class JwtService : IJwtService
         _jwtSettings = jwtSettings.Value;
     }
 
-    // Artık userId parametresi yok, sadece username ve role alıyor
+    //Sadece username ve role alıyor
     public string GenerateToken(string username, UserRole role)
     {
         // Eğer gerçekten username boş gelirse hata fırlatabilirsiniz
